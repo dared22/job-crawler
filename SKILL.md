@@ -42,9 +42,12 @@ return it as a Telegram-friendly message. Run end-to-end without asking the user
      (dated + structured), e.g. `boards-api.greenhouse.io/v1/boards/optiverus/jobs`.
    - **LinkedIn + thehub/kode24/jobbnorge** — `web_search` the query templates (no login).
    - **GitHub grad/intern lists** — `web_fetch` the raw README markdown.
-   Budget your tool calls — a handful per source; don't loop forever. When you open a posting,
-   capture its **application deadline** and **posted date** (Greenhouse: `updated_at`) — needed
-   for the freshness gate (step 4) and the summary.
+   Budget your tool calls — a handful per source; don't loop forever. **Exception:
+   bindeleddet.no** has returned zero postings in every run since this skill was created —
+   follow its forced-attempt procedure in `sources.md` (up to 3 browser-tool attempts, with a
+   render-wait/recheck step) instead of the default handful; don't let it silently zero out
+   again. When you open a posting, capture its **application deadline** and **posted date**
+   (Greenhouse: `updated_at`) — needed for the freshness gate (step 4) and the summary.
 
 3. **Deduplicate.** Normalise each posting's URL into a fingerprint (strip tracking params,
    lowercase host; for finn.no use the `finnkode` id). **Drop any fingerprint already in

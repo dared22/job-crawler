@@ -31,11 +31,32 @@ The **numeric ad id is the dedup fingerprint** (normalise to one canonical form)
 **Fallback if the browser tool struggles:** `web_search` →
 `site:finn.no/job machine learning Oslo`, `site:finn.no/job maskinlæring`, etc.
 
-## 2. bindeleddet.no  (NTNU "Bedriftskontakt") — use the `browser` tool
-JS-rendered single-page site; the old `/jobb` path 404s. Open `https://www.bindeleddet.no`
-with the **`browser`** tool and follow the site's own nav to its job / "ledige stillinger"
-section, then into individual postings. Each posting's canonical URL is the fingerprint. Small
-source — if you can't find live listings, note it in the footer and move on.
+## 2. bindeleddet.no  (NTNU "Bedriftskontakt") — use the `browser` tool — FORCE A REAL ATTEMPT
+This site is a **pure client-side SPA**: every path — `/jobs`, `/jobb`, and individual posting
+URLs like `/jobs/<id>/` — returns **HTTP 404 on a plain fetch**, because the server has no route
+for them at all; the content only exists after client-side JavaScript renders it. This has
+caused this source to **return zero postings in every run since the skill was created** —
+treat that streak as evidence of a tool/procedure failure, not proof the source is empty.
+Do not let this run repeat that streak on autopilot.
+
+Concrete procedure — follow every step before concluding "nothing found":
+1. Open `https://bindeleddet.no/jobs` with the **`browser`** tool (try `https://www.bindeleddet.no`
+   too if the bare domain doesn't render).
+2. **Wait for the SPA to hydrate before reading the page** — an immediate read after page-load
+   often only catches an empty shell (title, no body). If your browser tool supports a
+   wait/sleep or "wait for selector", use it; otherwise take a second snapshot a few seconds
+   after the first and compare — if the second has more content, the first was read too early.
+3. In the rendered page, look for links matching `/jobs/<numeric-id>/` — those are individual
+   postings.
+4. Open each candidate posting with the **`browser`** tool (same wait-and-recheck approach) to
+   read title, company, and deadline.
+5. **Budget up to 3 browser-tool attempts on this source** (more than the usual "handful" —
+   its 100% historical failure rate earns it a harder push) before giving up.
+6. In the summary footer, distinguish *why* you got nothing, if you do: `bindeleddet — page
+   never rendered (tool issue)` is a different signal than `bindeleddet — rendered, zero
+   postings`. Never just write "nothing new" without knowing which one happened.
+
+Each posting's canonical URL (`https://bindeleddet.no/jobs/<id>/`) is the fingerprint.
 
 ## 3. arbeidsplassen.nav.no  (NAV — Norway's official national job board)  [NEW]
 Aggregates most finn.no + public-sector ads — best single net for Norway/Oslo. Use
