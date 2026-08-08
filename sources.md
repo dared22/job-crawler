@@ -32,26 +32,31 @@ The **numeric ad id is the dedup fingerprint** (normalise to one canonical form)
 **Fallback if the browser tool struggles:** `web_search` →
 `site:finn.no/job machine learning Oslo`, `site:finn.no/job maskinlæring`, etc.
 
-## 2. bindeleddet.no  (NTNU "Bedriftskontakt") — use `web_fetch` on its JSON API directly, NOT the browser
-The site's frontend is a client-side SPA (that's why plain HTML fetches of `/jobs` or
-`/jobs/<id>/` 404 — no browser tool can fix that reliably either, which is why this source
-returned **zero postings in every run since the skill was created**). But the SPA is just a
-thin UI over a public, unauthenticated JSON REST API — hit that API directly instead:
+## 2. bindeleddet.no  (NTNU "Bedriftskontakt") — pre-fetched by a script, use `read`
+The site's frontend is a client-side SPA (plain fetches of `/jobs` or `/jobs/<id>/` 404 — that's
+why this source returned **zero postings in every run since the skill was created**), but it's
+just a thin UI over a public, unauthenticated JSON REST API at `apiv2.bindeleddet.no`.
 
-- **List all current postings (one call, no pagination):**
-  `web_fetch` → `https://apiv2.bindeleddet.no/jobs/`
-  Returns a JSON array (~85 entries, ~400KB) of every open posting, each with `id`, `title`,
-  `company_name`, `location`, `description` (HTML), `deadline` (ISO datetime — feeds the
-  freshness gate directly, no parsing "Frist" text), `created_at` (ISO datetime), `job_type`,
-  `year_levels`. Filter by title/description keywords first before reading full descriptions.
-- **Single posting detail:** `web_fetch` → `https://apiv2.bindeleddet.no/jobs/<id>/` — same
-  shape as one array element. Rarely needed since the list already has everything.
-- The frontend URL `https://bindeleddet.no/jobs/<id>/` is still the right **fingerprint** and
-  the right link to put in the summary (`🔗`) — humans should land on the SPA page, not the
-  raw API JSON. Only the *fetching* goes through `apiv2.bindeleddet.no`.
-- Do not use the `browser` tool here — it was the source of the standing failure. If
-  `apiv2.bindeleddet.no` itself ever goes down or changes shape, note that in the footer and
-  move on rather than falling back to browsing the SPA.
+Rather than relying on the agent to fetch and interpret that API correctly every single run,
+**`fetch_bindeleddet.py`** (in this skill's directory) does it deterministically: it calls the
+API, drops anything already in `state/seen_jobs.json` and anything past its deadline (or
+undated + >6 weeks old), and writes the survivors to **`state/bindeleddet_candidates.json`**
+(fields: `id`, `url`, `title`, `company_name`, `location`, `job_type`, `year_levels`,
+`deadline`, `created_at`, `description` — HTML tags already stripped). A system cron entry runs
+this script every Monday at 07:55 Europe/Oslo, five minutes before the agent's 08:00 run.
+
+**In the crawl step:** `read` `state/bindeleddet_candidates.json`.
+- Check `fetched_at` — if it's from today's run (same date as "now"), the `candidates` array
+  *is* your new-and-live bindeleddet postings; score them directly, no fetch needed.
+- If the file is missing or `fetched_at` is stale (not today), the cron pre-step didn't run —
+  fall back to `web_fetch` on `https://apiv2.bindeleddet.no/jobs/` directly (same JSON shape,
+  one array element per posting) and apply the dedup/freshness filtering yourself. Note the
+  fallback in the summary footer either way (`bindeleddet — pre-fetched ✓` vs
+  `bindeleddet — pre-fetch missing, fell back to live fetch`).
+- The frontend URL `https://bindeleddet.no/jobs/<id>/` (already in each candidate's `url`
+  field) is the fingerprint and the link to put in the summary (`🔗`) — never link the raw API.
+- Do not use the `browser` tool on this source under any circumstance — it was the cause of the
+  original standing failure and there is no scenario where it's needed here.
 
 ## 3. arbeidsplassen.nav.no  (NAV — Norway's official national job board)  [NEW]
 Aggregates most finn.no + public-sector ads — best single net for Norway/Oslo. Use

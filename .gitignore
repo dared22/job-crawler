@@ -1,2 +1,3 @@
 state/*.bak-*
 state/seen_jobs.json
+state/bindeleddet_candidates.json

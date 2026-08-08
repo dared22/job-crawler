@@ -38,11 +38,11 @@ return it as a Telegram-friendly message. Run end-to-end without asking the user
    - **finn.no, arbeidsplassen.nav.no** — JS-heavy/bot-protected: open with the **`browser`**
      tool, or fall back to `web_search` `site:` queries. Do **not** use `web_fetch` on these
      (it returns a blank/blocked page). For finn.no collect the `finnkode` ids.
-   - **bindeleddet.no** — its frontend is a JS SPA, but it's backed by a plain public JSON API.
-     `web_fetch` **`https://apiv2.bindeleddet.no/jobs/`** directly (one call returns every open
-     posting with id/title/company/deadline/created_at already structured) — do **not** use the
-     `browser` tool here, it was the source of this returning zero postings in every run before
-     this fix. Full detail in `sources.md`.
+   - **bindeleddet.no** — a system cron entry runs `fetch_bindeleddet.py` before this agent turn
+     each week, so just **`read`** `state/bindeleddet_candidates.json` (already fetched, deduped,
+     and freshness-gated). Only fall back to `web_fetch` on `https://apiv2.bindeleddet.no/jobs/`
+     directly if that file is missing or stale. Do **not** use the `browser` tool on this source
+     under any circumstance. Full detail in `sources.md`.
    - **Amsterdam prop firms (Optiver/IMC/…)** — `web_fetch` the **Greenhouse JSON** boards
      (dated + structured), e.g. `boards-api.greenhouse.io/v1/boards/optiverus/jobs`.
    - **LinkedIn + thehub/kode24/jobbnorge** — `web_search` the query templates (no login).
