@@ -6,12 +6,13 @@ are defined in `profile.md` — this file is the *where to look*.
 ## ⚙️ Tooling reality (read first)
 This agent's actual tools are **`web_search` (Brave)**, a headless **`browser`** tool, and
 **`web_fetch`**. There is **no `firecrawl`** here. Pick the tool per source:
-- **JS-heavy / bot-protected sites** (finn.no, bindeleddet, arbeidsplassen) → use the
-  **`browser`** tool to render the page, *or* `web_search` with a `site:` filter. **Do NOT
-  rely on `web_fetch` for these — it gets a blank/blocked page** (that's why finn.no returned
-  nothing before).
-- **ATS JSON boards** (Greenhouse / Lever) and plain HTML/Markdown → use **`web_fetch`** (fast,
-  structured, dated, not blocked).
+- **JS-heavy / bot-protected sites** (finn.no, arbeidsplassen) → use the **`browser`** tool to
+  render the page, *or* `web_search` with a `site:` filter. **Do NOT rely on `web_fetch` for
+  these — it gets a blank/blocked page** (that's why finn.no returned nothing before).
+- **ATS JSON boards** (Greenhouse / Lever), **bindeleddet's `apiv2.bindeleddet.no` JSON API**,
+  and plain HTML/Markdown → use **`web_fetch`** (fast, structured, dated, not blocked).
+  bindeleddet's frontend *looks* JS-heavy but its backend API is a plain public JSON endpoint —
+  see section 2 below, don't reach for the `browser` tool on it.
 - `web_search` is the most reliable broad-coverage path — lead with it, then deepen with the
   browser/web_fetch on the specific postings you want to score.
 - Budget tool calls: a handful per source. If a source blocks or returns nothing, **note it in
@@ -31,32 +32,26 @@ The **numeric ad id is the dedup fingerprint** (normalise to one canonical form)
 **Fallback if the browser tool struggles:** `web_search` →
 `site:finn.no/job machine learning Oslo`, `site:finn.no/job maskinlæring`, etc.
 
-## 2. bindeleddet.no  (NTNU "Bedriftskontakt") — use the `browser` tool — FORCE A REAL ATTEMPT
-This site is a **pure client-side SPA**: every path — `/jobs`, `/jobb`, and individual posting
-URLs like `/jobs/<id>/` — returns **HTTP 404 on a plain fetch**, because the server has no route
-for them at all; the content only exists after client-side JavaScript renders it. This has
-caused this source to **return zero postings in every run since the skill was created** —
-treat that streak as evidence of a tool/procedure failure, not proof the source is empty.
-Do not let this run repeat that streak on autopilot.
+## 2. bindeleddet.no  (NTNU "Bedriftskontakt") — use `web_fetch` on its JSON API directly, NOT the browser
+The site's frontend is a client-side SPA (that's why plain HTML fetches of `/jobs` or
+`/jobs/<id>/` 404 — no browser tool can fix that reliably either, which is why this source
+returned **zero postings in every run since the skill was created**). But the SPA is just a
+thin UI over a public, unauthenticated JSON REST API — hit that API directly instead:
 
-Concrete procedure — follow every step before concluding "nothing found":
-1. Open `https://bindeleddet.no/jobs` with the **`browser`** tool (try `https://www.bindeleddet.no`
-   too if the bare domain doesn't render).
-2. **Wait for the SPA to hydrate before reading the page** — an immediate read after page-load
-   often only catches an empty shell (title, no body). If your browser tool supports a
-   wait/sleep or "wait for selector", use it; otherwise take a second snapshot a few seconds
-   after the first and compare — if the second has more content, the first was read too early.
-3. In the rendered page, look for links matching `/jobs/<numeric-id>/` — those are individual
-   postings.
-4. Open each candidate posting with the **`browser`** tool (same wait-and-recheck approach) to
-   read title, company, and deadline.
-5. **Budget up to 3 browser-tool attempts on this source** (more than the usual "handful" —
-   its 100% historical failure rate earns it a harder push) before giving up.
-6. In the summary footer, distinguish *why* you got nothing, if you do: `bindeleddet — page
-   never rendered (tool issue)` is a different signal than `bindeleddet — rendered, zero
-   postings`. Never just write "nothing new" without knowing which one happened.
-
-Each posting's canonical URL (`https://bindeleddet.no/jobs/<id>/`) is the fingerprint.
+- **List all current postings (one call, no pagination):**
+  `web_fetch` → `https://apiv2.bindeleddet.no/jobs/`
+  Returns a JSON array (~85 entries, ~400KB) of every open posting, each with `id`, `title`,
+  `company_name`, `location`, `description` (HTML), `deadline` (ISO datetime — feeds the
+  freshness gate directly, no parsing "Frist" text), `created_at` (ISO datetime), `job_type`,
+  `year_levels`. Filter by title/description keywords first before reading full descriptions.
+- **Single posting detail:** `web_fetch` → `https://apiv2.bindeleddet.no/jobs/<id>/` — same
+  shape as one array element. Rarely needed since the list already has everything.
+- The frontend URL `https://bindeleddet.no/jobs/<id>/` is still the right **fingerprint** and
+  the right link to put in the summary (`🔗`) — humans should land on the SPA page, not the
+  raw API JSON. Only the *fetching* goes through `apiv2.bindeleddet.no`.
+- Do not use the `browser` tool here — it was the source of the standing failure. If
+  `apiv2.bindeleddet.no` itself ever goes down or changes shape, note that in the footer and
+  move on rather than falling back to browsing the SPA.
 
 ## 3. arbeidsplassen.nav.no  (NAV — Norway's official national job board)  [NEW]
 Aggregates most finn.no + public-sector ads — best single net for Norway/Oslo. Use

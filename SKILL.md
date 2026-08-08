@@ -35,19 +35,21 @@ return it as a Telegram-friendly message. Run end-to-end without asking the user
 2. **Gather current postings** from the sources in `sources.md`. Read its **⚙️ Tooling reality**
    section first — this agent has `web_search` (Brave), a headless `browser` tool, and
    `web_fetch`, but **no `firecrawl`**. Match the tool to the source:
-   - **finn.no, bindeleddet.no, arbeidsplassen.nav.no** — JS-heavy/bot-protected: open with the
-     **`browser`** tool, or fall back to `web_search` `site:` queries. Do **not** use `web_fetch`
-     on these (it returns a blank/blocked page). For finn.no collect the `finnkode` ids.
+   - **finn.no, arbeidsplassen.nav.no** — JS-heavy/bot-protected: open with the **`browser`**
+     tool, or fall back to `web_search` `site:` queries. Do **not** use `web_fetch` on these
+     (it returns a blank/blocked page). For finn.no collect the `finnkode` ids.
+   - **bindeleddet.no** — its frontend is a JS SPA, but it's backed by a plain public JSON API.
+     `web_fetch` **`https://apiv2.bindeleddet.no/jobs/`** directly (one call returns every open
+     posting with id/title/company/deadline/created_at already structured) — do **not** use the
+     `browser` tool here, it was the source of this returning zero postings in every run before
+     this fix. Full detail in `sources.md`.
    - **Amsterdam prop firms (Optiver/IMC/…)** — `web_fetch` the **Greenhouse JSON** boards
      (dated + structured), e.g. `boards-api.greenhouse.io/v1/boards/optiverus/jobs`.
    - **LinkedIn + thehub/kode24/jobbnorge** — `web_search` the query templates (no login).
    - **GitHub grad/intern lists** — `web_fetch` the raw README markdown.
-   Budget your tool calls — a handful per source; don't loop forever. **Exception:
-   bindeleddet.no** has returned zero postings in every run since this skill was created —
-   follow its forced-attempt procedure in `sources.md` (up to 3 browser-tool attempts, with a
-   render-wait/recheck step) instead of the default handful; don't let it silently zero out
-   again. When you open a posting, capture its **application deadline** and **posted date**
-   (Greenhouse: `updated_at`) — needed for the freshness gate (step 4) and the summary.
+   Budget your tool calls — a handful per source; don't loop forever. When you open a posting,
+   capture its **application deadline** and **posted date** (Greenhouse: `updated_at`) — needed
+   for the freshness gate (step 4) and the summary.
 
 3. **Deduplicate.** Normalise each posting's URL into a fingerprint (strip tracking params,
    lowercase host; for finn.no use the `finnkode` id). **Drop any fingerprint already in
