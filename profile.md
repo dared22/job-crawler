@@ -1,94 +1,74 @@
-# Candidate profile & scoring rubric
+# Candidate profile and ranking policy
 
-This file is the single source of truth for *what to search for* and *how to score* each
-posting. The job_crawler skill reads it every run. Score each posting 0–100, apply the
-multiplier, sort highest-first.
+This is the single source of truth for eligibility and fit. The deterministic pipeline enforces
+hard gates and calculates the final score; the agent supplies normalized facts and a concise fit
+reason from each posting.
 
-## Who I am (for the "why it fits" line)
-Early-career ML/AI + quant candidate. Thesis on **neural SDEs** (neural stochastic
-differential equations) — the intersection of deep learning and quantitative/stochastic
-finance is my single most differentiated wedge. Core stack: Python, PyTorch,
-transformers/Hugging Face, LLMs/foundation models, CUDA/GPU + distributed training,
-time-series & stochastic methods.
+## Candidate
 
-**Status / timeline:** Graduating in **2027** (next year) at **MSc level — I do NOT have a
-PhD and am not pursuing one.** Internships, summer placements, new-grad and graduate-programme
-roles are squarely in scope and are the **primary target** — treat them as first-class, not
-afterthoughts.
+- Early-career MSc candidate graduating in 2027.
+- Core stack: Python, PyTorch, transformers/Hugging Face, LLMs/foundation models, CUDA/GPU,
+  distributed training, time-series modelling and stochastic methods.
+- Thesis: neural stochastic differential equations. ML combined with quantitative/stochastic
+  finance is a distinctive strength.
+- Primary targets: internships, summer placements, graduate programmes, new-grad and junior
+  roles with 0–3 years of experience.
 
-## Two equally-weighted title buckets
-Run these as two equally-weighted lanes — neither lane should crowd the other out.
+## Three equal search lanes
 
-**ML/AI bucket:** Machine Learning Engineer, AI Engineer, Applied Scientist,
-Research Engineer, ML Research Engineer, Foundation Model Engineer, LLM Engineer,
-Deep Learning Engineer, MLOps Engineer, ML Platform / Infrastructure Engineer.
+### 🔬 AI research
 
-**Quant bucket:** Quantitative Researcher, Quant Developer, Quant Engineer,
-Systematic Trading Researcher, "ML Engineer + (trading OR fintech OR hedge fund)".
+Search explicitly for Research Engineer, ML Research Engineer, Research Software Engineer,
+Applied Scientist, MSc-eligible Research Scientist, Scientific ML Engineer and Research Intern.
 
-**Internship & graduate lane (applies across BOTH buckets above — search these explicitly):**
-ML/AI Intern, Quant Intern, Research Intern, Summer Analyst / Summer Internship (Quant/ML),
-Graduate Programme, Graduate Engineer, Graduate ML/Quant, New Grad, Trainee, Working-student.
-These often don't surface under the senior-sounding titles, so query them on their own.
+Time-series research is a first-class specialty, including:
 
-**Norwegian variants (for finn.no):** maskinlæring, kunstig intelligens, ML-ingeniør,
-data scientist, kvantitativ.
+- time-series modelling and forecasting;
+- neural SDEs and stochastic processes;
+- sequential, state-space and probabilistic models;
+- financial and economic time series;
+- sensor, energy, climate and industrial forecasting;
+- spatiotemporal modelling;
+- foundation models for time series;
+- anomaly detection and signal processing.
 
-## Geography filter
-- **Scope:** All Europe + remote-EU.
-- **Amsterdam = priority cluster** — Optiver, IMC, Flow Traders, Da Vinci, Maven.
-  Surface these to the top even when the wider European net is noisy.
-- **Norway:** weight **Oslo** highest.
+Relevant titles include Time Series Researcher, Forecasting Scientist, Research Engineer — Time
+Series and Applied Scientist — Forecasting. Strongly boost time-series work that also involves
+deep learning or quantitative finance.
 
-## Seniority gate
-- **Keep (in priority order):** **internships / summer placements → graduate programmes &
-  new-grad → junior/mid (0–3 yr).** Graduating in 2027, so internships and graduate roles are
-  the bullseye — give them a visible ranking boost (see rubric), don't bury them under mid-level
-  full-time roles.
-- **Auto-reject:** Staff / Principal / Lead; anything stating **5+ years required**; roles
-  framed as **senior / experienced-hire**.
+### 🤖 AI engineering
 
-## Freshness / application-deadline gate (CRITICAL — must still be applicable today)
-Only surface roles I can **still apply to**. Compute everything relative to **today's date at
-run time**. A great match I can't apply to is worse than useless — last run sent expired ones.
-- **Drop if the application deadline has passed.** finn.no shows "Frist" / "Søknadsfrist";
-  LinkedIn and others show "apply by", "closes", "deadline". Past deadline → drop entirely.
-- **Drop if the posting is closed/expired** — LinkedIn "No longer accepting applications",
-  "Closed", removed/404 ad pages.
-- **Drop stale undated posts:** no deadline **and** posted more than ~6 weeks ago
-  ("30+ days ago", old timestamp) → treat as likely expired, drop.
-- **Keep** rolling/open applications and graduate programmes with a **future start date** as
-  long as applications are still open (a 2027 start with open applications is good).
-- If you genuinely can't determine a deadline but the post looks recent (<3 weeks) → keep and
-  label it "deadline unknown". When in doubt on an old post, drop it.
-- **Capture each kept role's deadline / posted age** — it must appear in the summary so I can
-  see at a glance that it's live.
+AI Engineer, Machine Learning Engineer, Foundation Model/LLM Engineer, Deep Learning Engineer,
+MLOps Engineer, inference engineer, ML platform/infrastructure engineer and applied GenAI roles.
 
-## Scoring rubric (per posting)
-- **High weight (ML side):** PyTorch, transformers / Hugging Face, LLMs / foundation models,
-  CUDA / GPU + distributed training / training-infra, Python.
-- **High weight (quant side):** time-series modelling, stochastic / differential-equation
-  methods, systematic strategies.
-- **★ Bonus multiplier:** when a posting touches **both** ML **and** quantitative finance
-  (the neural-SDE overlap), multiply its score up — it should **rank to the very top**, not
-  just add a few points. This intersection is the rarest, most differentiated match.
-- **★ Graduate / internship boost:** internships, summer placements, graduate programmes and
-  explicit new-grad roles get a strong ranking boost that **stacks** with the ML∩quant
-  multiplier. I'm early-career graduating in 2027, so these are the most actionable — a
-  graduate/intern role that is *also* ML∩quant belongs at the very top of the list.
-- **Medium weight:** backend / APIs, Postgres, Docker, Azure, PySpark / data engineering.
-- **Low / neutral:** generic "data scientist" duties (dashboards, BI).
+### 📈 Quant + ML
 
-## Hard excludes (drop entirely)
-- Pure frontend.
-- Non-technical PM.
-- **Any role that requires a PhD** (completed or in-progress) as a hard requirement — I don't
-  have one and am not pursuing one. ✅ KEEP roles where a PhD is only "preferred / nice-to-have"
-  or listed as "MSc **or** PhD" (an MSc qualifies). Drop only the hard PhD gates.
-- Anything requiring nationality / security clearance.
-- 5+ year minimums.
+Quantitative Researcher, Quant Developer/Engineer, Systematic Trading Researcher and ML roles in
+trading, asset management, pricing, fintech or hedge funds. ML∩quant roles receive the strongest
+cross-lane bonus.
 
-## Volume note
-Casting wide (two lanes + all of Europe) pulls volume, so the **bonus multiplier** and the
-**seniority gate** are what keep the top of the list signal-rich. Lead with the ML∩quant
-matches and the Amsterdam/Oslo clusters; let the long tail fall below.
+## Geography
+
+- Search all of Europe and remote-Europe.
+- Explicit weekly coverage: Norway, Netherlands, Switzerland, Ireland and the UK.
+- Priority clusters: Oslo, Amsterdam, Zürich, Dublin and London.
+- Surface language and work-authorization requirements as visible caveats. Do not silently infer
+  the candidate's eligibility.
+
+## Hard gates
+
+- Reject closed roles and passed deadlines.
+- Reject undated roles posted more than 42 days ago unless explicitly rolling/open.
+- Reject Staff, Principal, Lead, Director and Head roles, or jobs requiring 5+ years.
+- Reject roles that require a completed or in-progress PhD. Keep “MSc or PhD” and “PhD
+  preferred/nice-to-have”.
+- Reject nationality/security-clearance requirements, pure frontend and non-technical PM roles.
+
+## Ranking priorities
+
+The pipeline scores role-lane fit, early-career suitability, technical overlap, time-series
+research, ML∩quant overlap, priority geography and freshness. Strong evidence beats title-only
+matches. Generic BI/dashboard work is low-value.
+
+The agent may provide `manual_score_adjustment` from -10 to +10 only for evidence not captured by
+the deterministic features. Never use it to bypass a hard gate.

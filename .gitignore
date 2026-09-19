@@ -1,3 +1,11 @@
 state/*.bak-*
 state/seen_jobs.json
 state/bindeleddet_candidates.json
+state/jobs.json
+state/raw_candidates.json
+state/last_digest.txt
+state/source_health.json
+state/*.log
+__pycache__/
+scripts/__pycache__/
+tests/__pycache__/

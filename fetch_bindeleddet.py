@@ -21,6 +21,7 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
 SEEN_PATH = BASE_DIR / "state" / "seen_jobs.json"
+LEDGER_PATH = BASE_DIR / "state" / "jobs.json"
 OUT_PATH = BASE_DIR / "state" / "bindeleddet_candidates.json"
 API_URL = "https://apiv2.bindeleddet.no/jobs/"
 FRONTEND_URL_TMPL = "https://bindeleddet.no/jobs/{id}/"
@@ -34,6 +35,16 @@ def strip_html(text: str) -> str:
 
 
 def load_seen() -> set:
+    """Suppress only jobs already reported by v2; retain legacy compatibility."""
+    try:
+        ledger = json.loads(LEDGER_PATH.read_text(encoding="utf-8"))
+        return {
+            fingerprint
+            for fingerprint, record in ledger.get("jobs", {}).items()
+            if record.get("status") in {"reported", "legacy_seen"}
+        }
+    except (FileNotFoundError, json.JSONDecodeError, AttributeError):
+        pass
     try:
         return set(json.loads(SEEN_PATH.read_text(encoding="utf-8")))
     except (FileNotFoundError, json.JSONDecodeError):

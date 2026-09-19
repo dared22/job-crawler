@@ -1,158 +1,60 @@
-# Sources & query entry points
+# Source policy
 
-Concrete URLs and query templates for the job_crawler skill. Buckets and Norwegian variants
-are defined in `profile.md` — this file is the *where to look*.
+The machine-readable registry is `source_registry.json`. Read it at the start of every crawl and
+attempt sources in priority order. A healthy weekly run must attempt at least two independent
+source types for Switzerland, Ireland and the UK, plus the existing Norway and Netherlands nets.
 
-## ⚙️ Tooling reality (read first)
-This agent's actual tools are **`web_search` (Brave)**, a headless **`browser`** tool, and
-**`web_fetch`**. There is **no `firecrawl`** here. Pick the tool per source:
-- **JS-heavy / bot-protected sites** (finn.no, arbeidsplassen) → use the **`browser`** tool to
-  render the page, *or* `web_search` with a `site:` filter. **Do NOT rely on `web_fetch` for
-  these — it gets a blank/blocked page** (that's why finn.no returned nothing before).
-- **ATS JSON boards** (Greenhouse / Lever), **bindeleddet's `apiv2.bindeleddet.no` JSON API**,
-  and plain HTML/Markdown → use **`web_fetch`** (fast, structured, dated, not blocked).
-  bindeleddet's frontend *looks* JS-heavy but its backend API is a plain public JSON endpoint —
-  see section 2 below, don't reach for the `browser` tool on it.
-- `web_search` is the most reliable broad-coverage path — lead with it, then deepen with the
-  browser/web_fetch on the specific postings you want to score.
-- Budget tool calls: a handful per source. If a source blocks or returns nothing, **note it in
-  the summary footer and move on** — never fail the whole run over one source.
+## Collection tiers
 
-## 1. finn.no  (Norway / Oslo) — use the `browser` tool, NOT web_fetch
-Full-time search URL (URL-encode the query):
-`https://www.finn.no/job/fulltime/search.html?q=<QUERY>`
-Open it with the **`browser`** tool (it's JS-rendered + bot-protected). Run the Norwegian
-variants + English ML/quant terms + the grad/intern terms:
-- `q=maskinlæring`, `q=kunstig%20intelligens`, `q=machine%20learning`, `q=quantitative`,
-  `q=data%20scientist`, `q=graduate`, `q=trainee`, `q=internship`
-Each result links to an ad page — finn.no's current format is
-`https://www.finn.no/job/ad/<id>` (older `…/fulltime/ad.html?finnkode=<id>` may still appear).
-The **numeric ad id is the dedup fingerprint** (normalise to one canonical form). Open the ad to read the description and the **deadline
-("Frist" / "Søknadsfrist")** for the freshness gate. Oslo-weight per profile.
-**Fallback if the browser tool struggles:** `web_search` →
-`site:finn.no/job machine learning Oslo`, `site:finn.no/job maskinlæring`, etc.
+1. Direct employer/lab boards and structured ATS/API feeds. These are authoritative and normally
+   provide stable URLs, dates and complete requirements.
+2. National and graduate boards: jobs.ch, ETH/EPFL, gradireland, JobsIreland/IrishJobs,
+   Gradcracker, Find a Job and jobs.ac.uk.
+3. LinkedIn and general web search for discovery and gaps. Never make LinkedIn the sole source for
+   a country or role lane.
 
-## 2. bindeleddet.no  (NTNU "Bedriftskontakt") — pre-fetched by a script, use `read`
-The site's frontend is a client-side SPA (plain fetches of `/jobs` or `/jobs/<id>/` 404 — that's
-why this source returned **zero postings in every run since the skill was created**), but it's
-just a thin UI over a public, unauthenticated JSON REST API at `apiv2.bindeleddet.no`.
+## Tool selection
 
-Rather than relying on the agent to fetch and interpret that API correctly every single run,
-**`fetch_bindeleddet.py`** (in this skill's directory) does it deterministically: it calls the
-API, drops anything already in `state/seen_jobs.json` and anything past its deadline (or
-undated + >6 weeks old), and writes the survivors to **`state/bindeleddet_candidates.json`**
-(fields: `id`, `url`, `title`, `company_name`, `location`, `job_type`, `year_levels`,
-`deadline`, `created_at`, `description` — HTML tags already stripped). A system cron entry runs
-this script every Monday at 07:55 Europe/Oslo, five minutes before the agent's 08:00 run.
+- Greenhouse, Lever, public JSON, plain HTML and Markdown: `web_fetch`.
+- JS-heavy or protected pages such as finn.no and Google Careers: browser, then `web_search`
+  fallback.
+- LinkedIn, IrishJobs and other gated boards: `web_search`; open only promising results.
+- Bindeleddet: read `state/bindeleddet_candidates.json`. If stale or missing, fetch
+  `https://apiv2.bindeleddet.no/jobs/`; never browse its SPA.
 
-**In the crawl step:** `read` `state/bindeleddet_candidates.json`.
-- Check `fetched_at` — if it's from today's run (same date as "now"), the `candidates` array
-  *is* your new-and-live bindeleddet postings; score them directly, no fetch needed.
-- If the file is missing or `fetched_at` is stale (not today), the cron pre-step didn't run —
-  fall back to `web_fetch` on `https://apiv2.bindeleddet.no/jobs/` directly (same JSON shape,
-  one array element per posting) and apply the dedup/freshness filtering yourself. Note the
-  fallback in the summary footer either way (`bindeleddet — pre-fetched ✓` vs
-  `bindeleddet — pre-fetch missing, fell back to live fetch`).
-- The frontend URL `https://bindeleddet.no/jobs/<id>/` (already in each candidate's `url`
-  field) is the fingerprint and the link to put in the summary (`🔗`) — never link the raw API.
-- Do not use the `browser` tool on this source under any circumstance — it was the cause of the
-  original standing failure and there is no scenario where it's needed here.
+## Required explicit searches
 
-## 3. arbeidsplassen.nav.no  (NAV — Norway's official national job board)  [NEW]
-Aggregates most finn.no + public-sector ads — best single net for Norway/Oslo. Use
-`web_search` with a `site:` filter (the public JSON feed API now needs a Bearer token, so skip
-the API unless one is configured):
-- `site:arbeidsplassen.nav.no maskinlæring`
-- `site:arbeidsplassen.nav.no "machine learning" Oslo`
-- `site:arbeidsplassen.nav.no kvantitativ OR data scientist`
-Each ad's canonical URL = fingerprint; open it for the deadline.
+For each of Switzerland, Ireland and the UK, combine early-career terms with all three lanes:
 
-## 4. Amsterdam priority prop firms — hit their own boards directly  [NEW]
-These are dated, structured, and not blocked — ideal `web_fetch` targets, and they carry the
-graduate/internship roles that matter most.
-- **Optiver** — Greenhouse board token `optiverus`. JSON list:
-  `https://boards-api.greenhouse.io/v1/boards/optiverus/jobs` (fields include `title`,
-  `location`, `updated_at`, `absolute_url`); per-job detail at `.../jobs/<id>`. Also the
-  human pages `https://www.optiver.com/join-us/graduate/` and `.../internships/`.
-- **IMC** — try Greenhouse `https://boards-api.greenhouse.io/v1/boards/imc/jobs`; if that 404s,
-  `web_search site:careers.imc.com (graduate OR intern) (quant OR machine learning)`.
-- **Flow Traders / Da Vinci / Maven** — `web_search`:
-  `site:flowtraders.com careers (graduate OR intern)`,
-  `site:davincitrading.com/careers (graduate OR quant)`,
-  `site:mavensecurities.com careers (graduate OR intern)`.
-For Greenhouse JSON, `updated_at` feeds the **freshness gate** and `absolute_url` is the
-fingerprint. These firms run rolling/EOI applications — keep open ones even with a 2027 start.
+- AI research: `research engineer`, `ML research engineer`, `applied scientist`, `research
+  software engineer`, `research intern`;
+- time series: `time series`, `forecasting`, `state space`, `sequential modelling`, `scientific
+  machine learning`, `neural SDE`, `stochastic`, `spatiotemporal`, `signal processing`;
+- AI engineering: `AI engineer`, `machine learning engineer`, `foundation model`, `LLM engineer`,
+  `inference`, `training infrastructure`;
+- quant + ML: `quantitative researcher`, `quant developer`, `systematic trading`, `machine
+  learning trading`;
+- early career: `graduate`, `new grad`, `junior`, `intern`, `summer`, `2027`, `0–3 years`.
 
-## 4b. NBIM — Norges Bank Investment Management (Oljefondet, Oslo)  [NEW]
-Norway's sovereign wealth fund — a top-priority Oslo employer for ML/quant/tech roles.
-`web_fetch` the listings page (it renders fine), then follow into individual postings:
-`https://www.nbim.no/no/om-oss/jobb-i-oljefondet/ledige-stillinger/`
-Individual postings live on the **Webcruiter** ATS — URL pattern
-`https://398280.webcruiter.no/main/recruit/public/<position-id>` — that URL is the dedup
-fingerprint, and Webcruiter pages show the application deadline ("søknadsfrist"). NBIM is small-
-volume (often only a handful of openings) but high-relevance: weight its quant / data science /
-ML / technology / graduate roles up, and apply the seniority gate (drop "Head of" / lead roles).
+Use the local-language Swiss variants when useful (`KI`, `maschinelles Lernen`, `prévision`,
+`apprentissage automatique`), while retaining English queries because many Swiss research and
+engineering roles are advertised in English.
 
-## 5. LinkedIn  (web_search only — no login)
-Query templates — run several, mixing buckets, geography, seniority:
-- `site:linkedin.com/jobs "Machine Learning Engineer" (graduate OR junior OR "0-3 years") Europe`
-- `site:linkedin.com/jobs "AI Engineer" (graduate OR junior) remote Europe`
-- `site:linkedin.com/jobs "Quantitative Researcher" (graduate OR junior) Amsterdam`
-- `site:linkedin.com/jobs "Quant Developer" (Optiver OR IMC OR "Flow Traders" OR "Da Vinci" OR Maven)`
-- `site:linkedin.com/jobs ("ML Engineer" OR "Applied Scientist") (Oslo OR Norway) junior`
-- `site:linkedin.com/jobs ("Research Engineer" OR "LLM Engineer") graduate Europe`
-- `site:linkedin.com/jobs ("ML Intern" OR "Machine Learning Intern" OR "AI Intern") Europe 2027`
-- `site:linkedin.com/jobs ("Quant Intern" OR "Quantitative Intern" OR "Summer Internship" quant) Amsterdam`
-- `site:linkedin.com/jobs ("Graduate Programme" OR "Graduate Engineer" OR "New Grad") (machine learning OR quant) Europe`
-- `site:linkedin.com/jobs ("Summer Analyst" OR internship) (Optiver OR IMC OR "Flow Traders" OR "Da Vinci" OR Maven)`
-Use the resolved LinkedIn job URL as the fingerprint. Open promising results for the
-description + deadline; some are gated — score from the snippet and note it.
+## Freshness and evidence
 
-## 6. Extra graduate / internship sources  [NEW]
-- **GitHub new-grad / internship lists** — `web_fetch` the raw README (plain dated markdown,
-  never blocked), then filter to Europe / remote-EU:
-  - `https://github.com/speedyapply/2026-AI-College-Jobs` (AI/ML internships + new-grad, updated daily)
-  - (also try `https://github.com/SimplifyJobs/Summer2026-Internships` if it exists at run time)
-- **thehub.io** — Nordic startup jobs (good for Oslo): `web_search site:thehub.io (machine learning OR data OR AI) Oslo`.
-- **kode24.no** — Norwegian dev jobs: `web_search site:kode24.no/jobb (machine learning OR data)`.
-- **jobbnorge.no** — academic / research Norway: `web_search site:jobbnorge.no (machine learning OR data scientist OR kvantitativ)`.
+- Open the canonical posting before reporting it. Capture posted date, deadline, seniority, PhD
+  wording, years required, language and work-authorization restrictions.
+- Treat “rolling” as open only when the canonical page is live.
+- Keep source failures isolated. Add each attempt to the payload's `sources` array with status
+  `ok`, `nothing_new`, `blocked`, `stale` or `error`.
+- Cap deep inspection to the strongest leads. A source failure must not abort the run.
 
-## 7. Big-tech Europe internships — Google & Amazon  [NEW]
-High-volume ML/DS/AI internship + new-grad pipelines. Both are Europe-wide, so **filter hard to
-Europe** (Oslo/Nordics and Amsterdam/NL first, then London/Dublin/Zurich/Munich/Berlin/Paris/
-Madrid/Warsaw) and drop US/APAC hits. Apply the **PhD hard-exclude** from `profile.md` — a large
-share of Google Research / Amazon Applied Scientist openings are PhD-only; keep "MSc or PhD".
-Pasha graduates 2027, so target **2027 summer internships** and 2026/2027 new-grad intakes.
+## Source-specific invariants
 
-- **Amazon** — `amazon.jobs` exposes a JSON search endpoint that is **not** blocked, so prefer
-  **`web_fetch`** here:
-  `https://www.amazon.jobs/en/search.json?base_query=<QUERY>&result_limit=100&sort=recent`
-  Useful `base_query` values: `machine learning intern`, `applied scientist intern`,
-  `data scientist intern`, `ML engineer graduate`. Response fields: `title`, `location`,
-  `posted_date` (→ freshness gate), `job_path` (→ fingerprint, prefix with
-  `https://www.amazon.jobs`). Also worth a pass:
-  `https://www.amazon.jobs/en/teams/internships-for-students` and Amazon Science's research
-  internships at `https://www.amazon.science/careers`.
-  Fallback: `web_search site:amazon.jobs (intern OR graduate) "machine learning" Europe`.
-
-- **Google** — `careers.google.com` is JS-rendered, so **do NOT `web_fetch` it**; use the
-  **`browser`** tool or lead with `web_search`:
-  `https://www.google.com/about/careers/applications/jobs/results/?employment_type=INTERN&q=<QUERY>`
-  with `q=machine learning`, `q=data science`, `q=AI`. Named student programmes to search by
-  name: **STEP** (Student Training in Engineering Program), **Student Researcher**,
-  **Software Engineering Intern, Machine Learning**. Fallback queries:
-  - `site:google.com/about/careers/applications/jobs ("machine learning" OR AI) intern Europe`
-  - `site:google.com/about/careers "Student Researcher" (Zurich OR London OR Munich OR Paris)`
-  The resolved `.../jobs/results/<id>-<slug>` URL is the fingerprint. Google posts *and pulls*
-  listings quickly — always confirm the posting is still live before including it.
-
-Both are large enough to flood the summary: cap at the **top ~3 per company per run** after
-scoring, and let the ML∩quant + graduate/internship boosts decide which survive.
-
-## Notes
-- Always normalise the fingerprint (strip tracking query params, lowercase host; finn.no →
-  `finnkode`; Greenhouse → `absolute_url`) before comparing against `state/seen_jobs.json`.
-- Capture each posting's **deadline / posted date** so the freshness gate (profile.md) and the
-  summary can use it.
-- If a source returns nothing for a run (site change / block / 404), note it in the summary's
-  footer rather than failing the whole run.
+- finn.no: canonical fingerprint is `https://finn.no/job/ad/<id>`.
+- Bindeleddet: canonical link is `https://bindeleddet.no/jobs/<id>/`, never the API URL.
+- Greenhouse/Lever: use the public job URL and ATS job ID; capture update timestamps.
+- Google: confirm the resolved job page remains live; listings are pulled quickly.
+- Amazon: prefer its JSON search response, then open shortlisted canonical pages.
+- Direct research boards are essential: Swiss AI/Apertus, ETH/EPFL, ADAPT/CeADAR/Insight,
+  DeepMind, Anthropic and Microsoft Research Cambridge.

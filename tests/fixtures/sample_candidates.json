@@ -1,0 +1,80 @@
+{
+  "generated_at": "2026-09-19T12:00:00Z",
+  "minimum_score": 55,
+  "max_results": 8,
+  "sources": [
+    {"id": "bindeleddet", "country": "NO", "status": "nothing_new", "new_count": 0},
+    {"id": "amsterdam_priority_firms", "country": "NL", "status": "nothing_new", "new_count": 0},
+    {"id": "jobs_ch", "country": "CH", "status": "ok", "new_count": 1},
+    {"id": "eth_jobs", "country": "CH", "status": "nothing_new", "new_count": 0},
+    {"id": "gradireland", "country": "IE", "status": "ok", "new_count": 1},
+    {"id": "ireland_ai_centres", "country": "IE", "status": "nothing_new", "new_count": 0},
+    {"id": "uk_frontier_ai", "country": "UK", "status": "ok", "new_count": 1},
+    {"id": "gradcracker", "country": "UK", "status": "nothing_new", "new_count": 0}
+  ],
+  "candidates": [
+    {
+      "title": "Research Engineer — Time Series",
+      "company": "Example Forecasting Lab",
+      "location": "Zürich",
+      "country": "CH",
+      "url": "https://example.org/jobs/ch-research-1?utm_source=test",
+      "description": "Research probabilistic time-series foundation models with PyTorch, Python and neural stochastic differential equations.",
+      "lane": "ai_research",
+      "seniority": "graduate",
+      "posted_at": "2026-09-15T10:00:00Z",
+      "deadline": "2026-10-15T23:59:59Z",
+      "open": true,
+      "phd_required": false,
+      "years_required": 0,
+      "why": "Direct neural-SDE and probabilistic time-series research match."
+    },
+    {
+      "title": "Graduate AI Engineer",
+      "company": "Example Dublin Tech",
+      "location": "Dublin",
+      "country": "IE",
+      "url": "https://example.org/jobs/ie-ai-2",
+      "description": "Build and deploy Python, PyTorch and LLM systems in production.",
+      "lane": "ai_engineering",
+      "seniority": "graduate",
+      "posted_at": "2026-09-16T10:00:00Z",
+      "rolling": true,
+      "open": true,
+      "phd_required": false,
+      "years_required": 0,
+      "why": "Strong production-AI role covering PyTorch and LLM deployment."
+    },
+    {
+      "title": "Quantitative Research Intern",
+      "company": "Example Quant",
+      "location": "London",
+      "country": "UK",
+      "url": "https://example.org/jobs/uk-quant-3",
+      "description": "Use machine learning, Python and stochastic time-series models for systematic trading research.",
+      "lane": "quant_ml",
+      "seniority": "internship",
+      "posted_at": "2026-09-17T10:00:00Z",
+      "deadline": "2026-10-30T23:59:59Z",
+      "open": true,
+      "phd_required": false,
+      "years_required": 0,
+      "why": "Excellent ML∩quant fit for stochastic time-series research."
+    },
+    {
+      "title": "Senior Research Scientist",
+      "company": "Example Reject",
+      "location": "London",
+      "country": "UK",
+      "url": "https://example.org/jobs/reject-4",
+      "description": "Requires a PhD and 8 years of experience.",
+      "lane": "ai_research",
+      "seniority": "senior",
+      "posted_at": "2026-09-18T10:00:00Z",
+      "open": true,
+      "phd_required": true,
+      "years_required": 8,
+      "why": "Should never render."
+    }
+  ]
+}

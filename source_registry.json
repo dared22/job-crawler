@@ -1,0 +1,189 @@
+{
+  "version": 2,
+  "sources": [
+    {
+      "id": "bindeleddet",
+      "country": "NO",
+      "priority": 1,
+      "method": "prefetch_json",
+      "entrypoint": "state/bindeleddet_candidates.json",
+      "lanes": ["ai_research", "ai_engineering", "quant_ml"]
+    },
+    {
+      "id": "finn",
+      "country": "NO",
+      "priority": 1,
+      "method": "browser_or_search",
+      "entrypoint": "https://www.finn.no/job/fulltime/search.html",
+      "queries": ["maskinlæring", "kunstig intelligens", "AI engineer", "time series", "kvantitativ", "graduate", "internship"]
+    },
+    {
+      "id": "arbeidsplassen",
+      "country": "NO",
+      "priority": 2,
+      "method": "web_search",
+      "entrypoint": "https://arbeidsplassen.nav.no/stillinger",
+      "queries": ["site:arbeidsplassen.nav.no (maskinlæring OR \"AI engineer\" OR \"time series\" OR kvantitativ)"]
+    },
+    {
+      "id": "amsterdam_priority_firms",
+      "country": "NL",
+      "priority": 1,
+      "method": "ats_and_web_search",
+      "entrypoint": "https://boards-api.greenhouse.io/v1/boards/optiverus/jobs",
+      "queries": ["site:careers.imc.com (graduate OR intern) (quant OR machine learning)", "site:flowtraders.com careers (graduate OR intern)", "site:davincitrading.com/careers (graduate OR quant)", "site:mavensecurities.com careers (graduate OR intern)"]
+    },
+    {
+      "id": "jobs_ch",
+      "country": "CH",
+      "priority": 1,
+      "method": "web_fetch_or_search",
+      "entrypoint": "https://www.jobs.ch/en/vacancies/",
+      "queries": ["machine learning", "AI engineer", "research engineer", "time series", "forecasting", "internship machine learning"]
+    },
+    {
+      "id": "eth_jobs",
+      "country": "CH",
+      "priority": 1,
+      "method": "web_fetch",
+      "entrypoint": "https://jobs.ethz.ch/",
+      "queries": ["machine learning", "research engineer", "time series", "scientific machine learning", "intern"]
+    },
+    {
+      "id": "epfl_jobs",
+      "country": "CH",
+      "priority": 1,
+      "method": "web_fetch",
+      "entrypoint": "https://epflcareer.ch/en/jobs/",
+      "queries": ["AI engineer", "research engineer", "LLM", "time series", "internship"]
+    },
+    {
+      "id": "swiss_ai_labs",
+      "country": "CH",
+      "priority": 1,
+      "method": "web_fetch_and_search",
+      "entrypoint": "https://www.epfl.ch/labs/mlo/page-135381-en-html/",
+      "queries": ["site:epfl.ch (\"research engineer\" OR \"AI engineer\")", "site:idsia.ch jobs machine learning", "site:psi.ch jobs machine learning"]
+    },
+    {
+      "id": "swiss_frontier_labs",
+      "country": "CH",
+      "priority": 1,
+      "method": "direct_careers",
+      "entrypoint": "https://www.anthropic.com/careers/jobs",
+      "queries": ["site:anthropic.com/careers/jobs Zurich research engineer", "site:google.com/about/careers Zurich (AI OR machine learning OR research)"]
+    },
+    {
+      "id": "gradireland",
+      "country": "IE",
+      "priority": 1,
+      "method": "web_fetch_or_search",
+      "entrypoint": "https://gradireland.com/",
+      "queries": ["site:gradireland.com (AI OR machine learning OR data science) (graduate OR internship)"]
+    },
+    {
+      "id": "jobsireland",
+      "country": "IE",
+      "priority": 2,
+      "method": "web_search",
+      "entrypoint": "https://www.jobsireland.ie/",
+      "queries": ["site:jobsireland.ie (\"machine learning\" OR \"AI engineer\" OR \"research engineer\")"]
+    },
+    {
+      "id": "irishjobs",
+      "country": "IE",
+      "priority": 2,
+      "method": "web_search",
+      "entrypoint": "https://www.irishjobs.ie/",
+      "queries": ["site:irishjobs.ie (\"machine learning\" OR \"AI engineer\" OR \"time series\") (graduate OR junior OR intern)"]
+    },
+    {
+      "id": "ireland_ai_centres",
+      "country": "IE",
+      "priority": 1,
+      "method": "direct_careers",
+      "entrypoint": "https://www.adaptcentre.ie/careers/",
+      "queries": ["site:adaptcentre.ie careers AI", "site:ceadar.ie careers AI", "site:insight-centre.org vacancies machine learning"]
+    },
+    {
+      "id": "dublin_tech",
+      "country": "IE",
+      "priority": 1,
+      "method": "direct_careers_and_search",
+      "entrypoint": "https://www.google.com/about/careers/applications/jobs/results/",
+      "queries": ["site:google.com/about/careers Dublin (AI OR machine learning OR research) (intern OR graduate)", "site:amazon.jobs Dublin (machine learning OR applied scientist) (intern OR graduate)", "site:metacareers.com Dublin machine learning"]
+    },
+    {
+      "id": "gradcracker",
+      "country": "UK",
+      "priority": 1,
+      "method": "web_fetch",
+      "entrypoint": "https://www.gradcracker.com/search/computing-technology/ai-machine-learning-graduate-jobs",
+      "queries": ["AI machine learning", "research", "data science", "quant"]
+    },
+    {
+      "id": "find_a_job_uk",
+      "country": "UK",
+      "priority": 2,
+      "method": "web_fetch_or_search",
+      "entrypoint": "https://findajob.dwp.gov.uk/search?q=machine+learning",
+      "queries": ["machine learning", "AI engineer", "research engineer", "time series"]
+    },
+    {
+      "id": "uk_academic",
+      "country": "UK",
+      "priority": 2,
+      "method": "web_search",
+      "entrypoint": "https://www.jobs.ac.uk/",
+      "queries": ["site:jobs.ac.uk (\"research engineer\" OR \"research software engineer\") (machine learning OR \"time series\")"]
+    },
+    {
+      "id": "uk_frontier_ai",
+      "country": "UK",
+      "priority": 1,
+      "method": "direct_careers",
+      "entrypoint": "https://deepmind.google/careers/",
+      "queries": ["site:deepmind.google/careers London research engineer", "site:anthropic.com/careers/jobs London research engineer", "site:microsoft.com/en-us/research/lab/microsoft-research-cambridge careers"]
+    },
+    {
+      "id": "uk_ai_startups",
+      "country": "UK",
+      "priority": 1,
+      "method": "lever_greenhouse_and_search",
+      "entrypoint": "https://jobs.lever.co/apolloresearch",
+      "queries": ["site:jobs.lever.co London (\"research engineer\" OR \"AI engineer\")", "site:job-boards.greenhouse.io London (\"research engineer\" OR \"machine learning engineer\")"]
+    },
+    {
+      "id": "london_quant",
+      "country": "UK",
+      "priority": 1,
+      "method": "direct_careers_and_search",
+      "entrypoint": "https://www.janestreet.com/join-jane-street/open-roles/",
+      "queries": ["London (quantitative researcher OR quant developer) (graduate OR internship) 2027", "London machine learning research trading graduate"]
+    },
+    {
+      "id": "linkedin_discovery",
+      "country": "EU",
+      "priority": 3,
+      "method": "web_search",
+      "entrypoint": "https://www.linkedin.com/jobs/",
+      "queries": ["site:linkedin.com/jobs (\"AI Research Engineer\" OR \"ML Research Engineer\" OR \"Time Series Researcher\") (Zurich OR Dublin OR London)", "site:linkedin.com/jobs (\"AI Engineer\" OR \"Applied Scientist\") (graduate OR junior OR intern) (Switzerland OR Ireland OR UK)"]
+    },
+    {
+      "id": "amazon_europe",
+      "country": "EU",
+      "priority": 2,
+      "method": "json_api",
+      "entrypoint": "https://www.amazon.jobs/en/search.json?base_query=machine%20learning%20intern&result_limit=100&sort=recent",
+      "queries": ["machine learning intern", "applied scientist intern", "AI engineer graduate", "time series scientist"]
+    },
+    {
+      "id": "google_europe",
+      "country": "EU",
+      "priority": 2,
+      "method": "browser_or_search",
+      "entrypoint": "https://www.google.com/about/careers/applications/jobs/results/",
+      "queries": ["Student Researcher", "Research Engineer", "Machine Learning Intern", "AI Engineer Graduate"]
+    }
+  ]
+}
