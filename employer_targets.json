@@ -1,0 +1,491 @@
+{
+  "version": 1,
+  "primary_countries": [
+    "NO",
+    "IE",
+    "NL",
+    "CH"
+  ],
+  "policy": "Targets for discovery and technical fit, not proof of high pay or live eligible openings. Verify role compensation, eligibility and location each run. Markets are search priorities, not exhaustive office lists.",
+  "employers": [
+    {
+      "name": "Google",
+      "aliases": [
+        "Google DeepMind",
+        "DeepMind"
+      ],
+      "markets": [
+        "EU"
+      ],
+      "category": "existing_tech_or_quant_target"
+    },
+    {
+      "name": "Meta",
+      "aliases": [],
+      "markets": [
+        "EU"
+      ],
+      "category": "existing_tech_or_quant_target"
+    },
+    {
+      "name": "Amazon",
+      "aliases": [
+        "AWS",
+        "Amazon Web Services"
+      ],
+      "markets": [
+        "EU"
+      ],
+      "category": "existing_tech_or_quant_target"
+    },
+    {
+      "name": "Microsoft",
+      "aliases": [],
+      "markets": [
+        "EU"
+      ],
+      "category": "existing_tech_or_quant_target"
+    },
+    {
+      "name": "Apple",
+      "aliases": [],
+      "markets": [
+        "EU"
+      ],
+      "category": "existing_tech_or_quant_target"
+    },
+    {
+      "name": "NVIDIA",
+      "aliases": [],
+      "markets": [
+        "EU"
+      ],
+      "category": "existing_tech_or_quant_target"
+    },
+    {
+      "name": "OpenAI",
+      "aliases": [],
+      "markets": [
+        "EU"
+      ],
+      "category": "existing_tech_or_quant_target"
+    },
+    {
+      "name": "Anthropic",
+      "aliases": [],
+      "markets": [
+        "EU"
+      ],
+      "category": "existing_tech_or_quant_target"
+    },
+    {
+      "name": "Databricks",
+      "aliases": [],
+      "markets": [
+        "EU"
+      ],
+      "category": "existing_tech_or_quant_target"
+    },
+    {
+      "name": "Stripe",
+      "aliases": [],
+      "markets": [
+        "EU"
+      ],
+      "category": "existing_tech_or_quant_target"
+    },
+    {
+      "name": "Jane Street",
+      "aliases": [],
+      "markets": [
+        "EU"
+      ],
+      "category": "existing_tech_or_quant_target"
+    },
+    {
+      "name": "Citadel",
+      "aliases": [],
+      "markets": [
+        "EU"
+      ],
+      "category": "existing_tech_or_quant_target"
+    },
+    {
+      "name": "Citadel Securities",
+      "aliases": [],
+      "markets": [
+        "EU"
+      ],
+      "category": "existing_tech_or_quant_target"
+    },
+    {
+      "name": "Hudson River Trading",
+      "aliases": [
+        "HRT",
+        "H R T"
+      ],
+      "markets": [
+        "EU"
+      ],
+      "category": "existing_tech_or_quant_target"
+    },
+    {
+      "name": "Two Sigma",
+      "aliases": [],
+      "markets": [
+        "EU"
+      ],
+      "category": "existing_tech_or_quant_target"
+    },
+    {
+      "name": "D. E. Shaw",
+      "aliases": [
+        "DE Shaw"
+      ],
+      "markets": [
+        "EU"
+      ],
+      "category": "existing_tech_or_quant_target"
+    },
+    {
+      "name": "XTX Markets",
+      "aliases": [],
+      "markets": [
+        "EU"
+      ],
+      "category": "existing_tech_or_quant_target"
+    },
+    {
+      "name": "Optiver",
+      "aliases": [],
+      "markets": [
+        "EU"
+      ],
+      "category": "existing_tech_or_quant_target"
+    },
+    {
+      "name": "IMC",
+      "aliases": [
+        "IMC Trading"
+      ],
+      "markets": [
+        "EU"
+      ],
+      "category": "existing_tech_or_quant_target"
+    },
+    {
+      "name": "Susquehanna",
+      "aliases": [
+        "SIG",
+        "Susquehanna International Group"
+      ],
+      "markets": [
+        "EU"
+      ],
+      "category": "existing_tech_or_quant_target"
+    },
+    {
+      "name": "Millennium",
+      "aliases": [
+        "Millennium Management"
+      ],
+      "markets": [
+        "EU"
+      ],
+      "category": "existing_tech_or_quant_target"
+    },
+    {
+      "name": "Cognite",
+      "aliases": [
+        "Cognite AI for Industry"
+      ],
+      "markets": [
+        "NO"
+      ],
+      "career_url": "https://www.cognite.com/en/company/careers",
+      "category": "regional_technical_target"
+    },
+    {
+      "name": "Equinor",
+      "aliases": [],
+      "markets": [
+        "NO"
+      ],
+      "career_url": "https://www.equinor.com/careers",
+      "category": "regional_technical_target"
+    },
+    {
+      "name": "DNB",
+      "aliases": [],
+      "markets": [
+        "NO"
+      ],
+      "career_url": "https://www.dnb.no/en/about-us/careers",
+      "category": "regional_technical_target"
+    },
+    {
+      "name": "Telenor",
+      "aliases": [
+        "Telenor Group"
+      ],
+      "markets": [
+        "NO"
+      ],
+      "career_url": "https://www.telenor.com/career/open-positions/",
+      "category": "regional_technical_target"
+    },
+    {
+      "name": "Kongsberg",
+      "aliases": [
+        "Kongsberg Gruppen",
+        "Kongsberg Digital",
+        "Kongsberg Maritime",
+        "Kongsberg Defence & Aerospace"
+      ],
+      "markets": [
+        "NO"
+      ],
+      "career_url": "https://www.kongsberg.com/no/careers/",
+      "category": "regional_technical_target"
+    },
+    {
+      "name": "Workday",
+      "aliases": [],
+      "markets": [
+        "IE"
+      ],
+      "career_url": "https://workday.wd5.myworkdayjobs.com/Workday",
+      "category": "regional_technical_target"
+    },
+    {
+      "name": "Salesforce",
+      "aliases": [],
+      "markets": [
+        "IE"
+      ],
+      "career_url": "https://www.salesforce.com/eu/company/careers/",
+      "category": "regional_technical_target"
+    },
+    {
+      "name": "Mastercard",
+      "aliases": [],
+      "markets": [
+        "IE"
+      ],
+      "career_url": "https://careers.mastercard.com/us/en/dublin-ireland",
+      "category": "regional_technical_target"
+    },
+    {
+      "name": "HubSpot",
+      "aliases": [],
+      "markets": [
+        "IE"
+      ],
+      "career_url": "https://www.hubspot.com/careers/jobs",
+      "category": "regional_technical_target"
+    },
+    {
+      "name": "Intercom",
+      "aliases": [],
+      "markets": [
+        "IE"
+      ],
+      "career_url": "https://www.intercom.com/careers",
+      "category": "regional_technical_target"
+    },
+    {
+      "name": "ASML",
+      "aliases": [],
+      "markets": [
+        "NL"
+      ],
+      "career_url": "https://www.asml.com/en/careers",
+      "category": "regional_technical_target"
+    },
+    {
+      "name": "Booking.com",
+      "aliases": [
+        "Booking"
+      ],
+      "markets": [
+        "NL"
+      ],
+      "career_url": "https://careers.booking.com/teams/data-science-analytics/",
+      "category": "regional_technical_target"
+    },
+    {
+      "name": "Adyen",
+      "aliases": [],
+      "markets": [
+        "NL"
+      ],
+      "career_url": "https://careers.adyen.com/",
+      "category": "regional_technical_target"
+    },
+    {
+      "name": "Uber",
+      "aliases": [],
+      "markets": [
+        "NL"
+      ],
+      "career_url": "https://www.uber.com/global/en/careers/",
+      "category": "regional_technical_target"
+    },
+    {
+      "name": "ING",
+      "aliases": [
+        "ING Bank"
+      ],
+      "markets": [
+        "NL"
+      ],
+      "career_url": "https://careers.ing.com/",
+      "category": "regional_technical_target"
+    },
+    {
+      "name": "Flow Traders",
+      "aliases": [],
+      "markets": [
+        "NL"
+      ],
+      "career_url": "https://www.flowtraders.com/careers/",
+      "category": "regional_technical_target"
+    },
+    {
+      "name": "Da Vinci Trading",
+      "aliases": [
+        "Da Vinci",
+        "Davinci Trading"
+      ],
+      "markets": [
+        "NL"
+      ],
+      "career_url": "https://davincitrading.com/careers/",
+      "category": "regional_technical_target"
+    },
+    {
+      "name": "Maven Securities",
+      "aliases": [],
+      "markets": [
+        "NL"
+      ],
+      "career_url": "https://www.mavensecurities.com/emerging-talent/",
+      "category": "regional_technical_target"
+    },
+    {
+      "name": "bol",
+      "aliases": [
+        "bol.com"
+      ],
+      "markets": [
+        "NL"
+      ],
+      "career_url": "https://careers.bol.com/",
+      "category": "regional_technical_target"
+    },
+    {
+      "name": "Picnic",
+      "aliases": [
+        "Picnic Technologies"
+      ],
+      "markets": [
+        "NL"
+      ],
+      "career_url": "https://jobs.picnic.app/nl/vacancies",
+      "category": "regional_technical_target"
+    },
+    {
+      "name": "TomTom",
+      "aliases": [],
+      "markets": [
+        "NL"
+      ],
+      "career_url": "https://careers.tomtom.com/",
+      "category": "regional_technical_target"
+    },
+    {
+      "name": "Roche",
+      "aliases": [
+        "F. Hoffmann-La Roche",
+        "Hoffmann-La Roche"
+      ],
+      "markets": [
+        "CH"
+      ],
+      "career_url": "https://careers.roche.com/global/en/switzerland",
+      "category": "regional_technical_target"
+    },
+    {
+      "name": "Novartis",
+      "aliases": [],
+      "markets": [
+        "CH"
+      ],
+      "career_url": "https://www.novartis.com/careers/career-search/tag/LOC_CH",
+      "category": "regional_technical_target"
+    },
+    {
+      "name": "UBS",
+      "aliases": [
+        "UBS Group"
+      ],
+      "markets": [
+        "CH"
+      ],
+      "career_url": "https://www.ubs.com/global/en/careers/search-jobs.html",
+      "category": "regional_technical_target"
+    },
+    {
+      "name": "Swiss Re",
+      "aliases": [],
+      "markets": [
+        "CH"
+      ],
+      "career_url": "https://www.swissre.com/careers/jobSearch.html",
+      "category": "regional_technical_target"
+    },
+    {
+      "name": "Zurich Insurance",
+      "aliases": [
+        "Zurich Insurance Group",
+        "Zurich Insurance Company"
+      ],
+      "markets": [
+        "CH"
+      ],
+      "career_url": "https://www.careers.zurich.com/en",
+      "category": "regional_technical_target"
+    },
+    {
+      "name": "ABB",
+      "aliases": [],
+      "markets": [
+        "CH"
+      ],
+      "career_url": "https://careers.abb/dach/de/abb-switzerland-careers",
+      "category": "regional_technical_target"
+    },
+    {
+      "name": "Logitech",
+      "aliases": [
+        "Logitech Europe"
+      ],
+      "markets": [
+        "CH"
+      ],
+      "career_url": "https://secure.logitech.com/en-ch/careers",
+      "category": "regional_technical_target"
+    },
+    {
+      "name": "Swissquote",
+      "aliases": [
+        "Swissquote Bank"
+      ],
+      "markets": [
+        "CH"
+      ],
+      "career_url": "https://www.swissquote.com/en-ch/careers/open-jobs",
+      "category": "regional_technical_target"
+    }
+  ]
+}

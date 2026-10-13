@@ -1,7 +1,7 @@
 ---
 name: job-crawler
 description: >-
-  Weekly crawler for early-career AI research, AI engineering, time-series ML, and quant+ML jobs
+  Weekly crawler for early-career AI research, AI engineering, time-series ML, quant+ML, and priority-employer data science jobs
   across Norway, the Netherlands, Switzerland, Ireland, the UK, and wider Europe. Finds live
   internships, graduate and junior roles; ranks and deduplicates them; and returns a validated
   Telegram digest. Use when asked to run or maintain the job crawler or weekly job summary.
@@ -26,6 +26,7 @@ deterministic pipeline.
 - `profile.md`: candidate, lanes, eligibility and ranking policy.
 - `sources.md`: collection policy and source invariants.
 - `source_registry.json`: exact source/query registry.
+- `employer_targets.json`: shared employer groups, aliases, market priorities and career URLs.
 - `scripts/job_pipeline.py`: normalize, gate, score, select, persist, render and validate.
 - `state/jobs.json`: v2 job ledger. Never replace it with a flat seen-URL list.
 - `state/raw_candidates.json`: normalized input prepared during a run.
@@ -33,10 +34,10 @@ deterministic pipeline.
 
 ## Workflow
 
-1. Read `profile.md`, `sources.md`, `source_registry.json` and the current ledger.
+1. Read `profile.md`, `sources.md`, `source_registry.json`, `employer_targets.json` and the current ledger.
 2. Gather current postings. Attempt priority-1 sources first, then use priority-2/3 sources to fill
-   country or lane gaps. Every run must explicitly cover Switzerland, Ireland and the UK, plus
-   Norway and the Netherlands.
+   country or lane gaps. Search Norway, Ireland, Netherlands and Switzerland first, with at least two independent
+   source attempts per country. Search the UK and wider Europe as secondary markets.
 3. Open promising canonical postings and extract evidence. Do not invent deadlines, experience,
    PhD, language or authorization requirements.
 4. Write `state/raw_candidates.json` with this shape:
@@ -45,7 +46,7 @@ deterministic pipeline.
 {
   "generated_at": "2026-09-19T12:00:00+02:00",
   "minimum_score": 55,
-  "max_results": 8,
+  "max_results": 20,
   "sources": [
     {"id": "jobs_ch", "country": "CH", "status": "ok", "new_count": 3}
   ],
@@ -90,12 +91,12 @@ when its content changes.
 
 6. Read `state/last_digest.txt` and return its contents exactly. The first character of the reply
 must be `💼`; do not add a preamble, explanation, code fence or sign-off. The file is the entire
-Telegram message.
+Telegram report. OpenClaw splits it into messages within Telegram limits.
 
 ## Input rules
 
 - Use canonical URLs and one candidate per actual job.
-- `lane` is one of `ai_research`, `ai_engineering`, `quant_ml`. Omit only when the pipeline can
+- `lane` is one of `ai_research`, `ai_engineering`, `quant_ml`, `data_science`. Omit only when the pipeline can
   safely infer it.
 - Surface uncertain language/work-authorization requirements as caveats; do not silently reject
   them.
@@ -110,3 +111,19 @@ Telegram message.
   input or rendering issue and rerun once.
 - Do not send messages directly. The scheduled job's announce delivery handles Telegram after the
   final reply.
+
+## Report size and data science evidence
+
+- Set `max_results` to 20. The report budget is 12,000 characters; return the complete validated
+  file so scheduled delivery can split it into multiple Telegram messages. Never summarize it
+  into a shorter reply. Fewer than 20 results is correct when quality, diversity or size requires it.
+- Search all four lanes explicitly. For data science, apply the priority-employer policy in
+  `profile.md`; do not broaden it to generic BI or unrelated analyst jobs.
+- For an employer outside `employer_targets.json`, supply `employer_tier: "elite"`,
+  `employer_evidence` and an HTTPS `employer_evidence_url` supporting comparable technical
+  standing and compensation potential. A famous brand alone is not evidence of role-specific pay.
+- Optional pay fields: `compensation` (currency, range, period, base/bonus/equity breakdown),
+  `compensation_basis` (`employer_disclosed` or `estimate`), `compensation_source_url`.
+  Estimates require comparable country, role and seniority, with date and sample limitations
+  in the summary. Do not substitute US or senior salaries for European graduate pay.
+  When unavailable, leave pay fields empty; do not invent a range.

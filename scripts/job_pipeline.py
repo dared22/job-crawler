@@ -19,9 +19,19 @@ DEFAULT_LEDGER = BASE_DIR / "state" / "jobs.json"
 DEFAULT_LEGACY = BASE_DIR / "state" / "seen_jobs.json"
 DEFAULT_OUTPUT = BASE_DIR / "state" / "last_digest.txt"
 DEFAULT_SOURCE_HEALTH = BASE_DIR / "state" / "source_health.json"
-MAX_MESSAGE_CHARS = 3800
-MAX_RESULTS = 8
-VALID_LANES = {"ai_research", "ai_engineering", "quant_ml"}
+MAX_MESSAGE_CHARS = 12000
+MAX_RESULTS = 20
+VALID_LANES = {"ai_research", "ai_engineering", "quant_ml", "data_science"}
+PRIMARY_COUNTRIES = {"NO", "IE", "NL", "CH"}
+MAX_EMPLOYER_RESULTS = 4
+EMPLOYER_TARGETS = json.loads((BASE_DIR / "employer_targets.json").read_text(encoding="utf-8"))["employers"]
+
+
+def normalized_employer(value: object) -> str:
+    name = re.sub(r"[^a-z0-9]+", " ", clean_text(value).lower()).strip()
+    return re.sub(r"\s+(inc|ltd|limited|llc|plc|ag|asa|as|bv|b v|sa|s a)$", "", name).strip()
+
+
 TRACKING_PARAMS = {
     "fbclid", "gclid", "gh_src", "ref", "referrer", "source",
     "trk", "trackingid", "utm_campaign", "utm_content", "utm_medium",
@@ -35,6 +45,7 @@ LANE_META = {
     "ai_research": ("🔬", "AI research"),
     "ai_engineering": ("🤖", "AI engineering"),
     "quant_ml": ("📈", "quant + ML"),
+    "data_science": ("📊", "data science"),
 }
 
 
@@ -101,11 +112,44 @@ def combined_text(job: dict) -> str:
     return clean_text(" ".join(str(value or "") for value in values)).lower()
 
 
+def employer_key(job: dict) -> str:
+    name = normalized_employer(job.get("company"))
+    for employer in EMPLOYER_TARGETS:
+        aliases = [employer["name"], *employer.get("aliases", [])]
+        if name in {normalized_employer(alias) for alias in aliases}:
+            return normalized_employer(employer["name"])
+    return name
+
+
+def priority_employer(job: dict) -> bool:
+    name = employer_key(job)
+    if name in {normalized_employer(employer["name"]) for employer in EMPLOYER_TARGETS}:
+        return True
+    return (job.get("employer_tier") == "elite"
+            and bool(clean_text(job.get("employer_evidence")))
+            and clean_text(job.get("employer_evidence_url")).startswith("https://"))
+
+
+def compensation_label(job: dict) -> str:
+    summary = clean_text(job.get("compensation"), 160)
+    source = clean_text(job.get("compensation_source_url"))
+    basis = job.get("compensation_basis")
+    if summary and source.startswith("https://") and basis in {"employer_disclosed", "estimate"}:
+        label = "Published pay" if basis == "employer_disclosed" else "Estimated pay"
+        return f"💰 {label}: {summary} · {source}"
+    if job.get("lane") == "data_science":
+        return "💰 Pay not disclosed · priority employer; role-specific pay unverified"
+    return ""
+
+
 def infer_lane(job: dict) -> str:
     explicit = str(job.get("lane", "")).strip().lower()
     if explicit in VALID_LANES:
         return explicit
     text = combined_text(job)
+    title = clean_text(job.get("title")).lower()
+    if any(term in title for term in ("data scientist", "data science", "decision scientist", "product scientist")):
+        return "data_science"
     research_terms = (
         "research engineer", "research scientist", "research software", "applied scientist",
         "scientific machine learning", "time series", "time-series", "forecasting",
@@ -177,6 +221,8 @@ def hard_gate(job: dict, now: datetime) -> str | None:
         pass
     if re.search(r"\b([5-9]|1\d)\+?\s+years?\b", text) and "preferred" not in text:
         return "experience_5_plus"
+    if infer_lane(job) == "data_science" and not priority_employer(job):
+        return "data_science_employer_not_priority"
     seniority = infer_seniority(job)
     if seniority in {"senior", "staff", "principal", "lead", "director", "head"}:
         return "senior_role"
@@ -196,7 +242,7 @@ def score_job(job: dict, now: datetime) -> tuple[int, list[str]]:
     score = 22
     signals: list[str] = []
 
-    lane_points = {"ai_research": 27, "ai_engineering": 24, "quant_ml": 27}
+    lane_points = {"ai_research": 27, "ai_engineering": 24, "quant_ml": 27, "data_science": 24}
     score += lane_points[lane]
 
     if seniority in {"internship", "graduate", "new_grad", "trainee"}:
@@ -231,9 +277,23 @@ def score_job(job: dict, now: datetime) -> tuple[int, list[str]]:
             score += points
             signals.append(label)
 
+    if priority_employer(job):
+        score += 6
+        signals.append("priority employer")
+    if lane == "data_science" and any(term in text for term in (
+        "experimentation", "causal inference", "a/b test", "statistical model",
+        "machine learning", "optimization", "forecasting",
+    )):
+        score += 6
+        signals.append("statistical/ML work")
+
     location = f"{job.get('location', '')} {job.get('country', '')}".lower()
-    if any(place in location for place in ("oslo", "amsterdam", "zurich", "zürich", "dublin", "london")):
+    if any(place in location for place in ("oslo", "amsterdam", "zurich", "zürich", "dublin")):
         score += 4
+
+    if clean_text(job.get("country")).upper() in PRIMARY_COUNTRIES:
+        score += 6
+        signals.append("priority country")
 
     posted_at = parse_datetime(job.get("posted_at"))
     if posted_at:
@@ -330,19 +390,29 @@ def select_diverse(candidates: list[dict], limit: int = MAX_RESULTS) -> list[dic
     employer_counts: Counter[str] = Counter()
 
     def can_add(job: dict) -> bool:
-        employer = clean_text(job.get("company")).lower()
-        return country_counts[job["country"]] < 3 and employer_counts[employer] < 2
+        employer = employer_key(job)
+        return country_counts[job["country"]] < 6 and employer_counts[employer] < MAX_EMPLOYER_RESULTS
 
     def add(job: dict) -> None:
         selected.append(job)
         selected_urls.add(job["url"])
         country_counts[job["country"]] += 1
-        employer_counts[clean_text(job.get("company")).lower()] += 1
+        employer_counts[employer_key(job)] += 1
 
-    for lane in ("ai_research", "ai_engineering", "quant_ml"):
+    candidates = sorted(candidates, key=lambda job: (job["country"] not in PRIMARY_COUNTRIES, -job["score"]))
+    for lane in LANE_META:
         match = next((job for job in candidates if job["lane"] == lane and can_add(job)), None)
-        if match:
+        if match and len(selected) < max(0, limit):
             add(match)
+
+    for country in ("NO", "IE", "NL", "CH"):
+        if len(selected) >= limit:
+            break
+        if not country_counts[country]:
+            match = next((job for job in candidates if job["country"] == country
+                          and job["url"] not in selected_urls and can_add(job)), None)
+            if match:
+                add(match)
 
     for job in candidates:
         if len(selected) >= limit:
@@ -403,7 +473,7 @@ def validate_coverage(payload: dict) -> None:
         if country and source_id and (country, source_id) not in unique_ids:
             attempted[country] += 1
             unique_ids.add((country, source_id))
-    requirements = {"NO": 1, "NL": 1, "CH": 2, "IE": 2, "UK": 2}
+    requirements = {"NO": 2, "NL": 2, "CH": 2, "IE": 2, "UK": 1}
     missing = [f"{country} {attempted[country]}/{minimum}" for country, minimum in requirements.items() if attempted[country] < minimum]
     if missing:
         raise ValueError("insufficient source coverage: " + ", ".join(missing))
@@ -414,7 +484,7 @@ def render_digest(selected: list[dict], payload: dict, now: datetime) -> str:
         return "💼 No new job matches this week.\n" + source_footer(payload)
     lane_counts = Counter(job["lane"] for job in selected)
     summary_bits = []
-    for lane in ("ai_research", "ai_engineering", "quant_ml"):
+    for lane in LANE_META:
         count = lane_counts.get(lane, 0)
         if count:
             summary_bits.append(f"{LANE_META[lane][0]} {count}")
@@ -443,6 +513,7 @@ def render_digest(selected: list[dict], payload: dict, now: datetime) -> str:
             f"🏢 {clean_text(job.get('company'), 55)} · 📍 {clean_text(job.get('location'), 70)} {flag}",
             f"{seniority_label(job['seniority'])} · 🎯 {job['score']}/100 · {tag_line}{caveats}",
             f"💡 {why}",
+            *([compensation_label(job)] if compensation_label(job) else []),
             f"⏳ {deadline_label(job)}",
             f"🔗 {job['url']}",
             "",
