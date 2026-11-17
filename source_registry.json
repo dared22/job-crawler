@@ -416,6 +416,71 @@
         "(\"Jane Street\" OR Citadel OR \"Hudson River Trading\" OR \"Two Sigma\" OR \"D. E. Shaw\" OR Optiver OR IMC OR Susquehanna OR \"XTX Markets\" OR Millennium) (\"data scientist\" OR \"data science\" OR \"decision scientist\") (intern OR graduate OR junior) UK London"
       ],
       "notes": "Use search for discovery; verify on canonical employer/ATS posting. Apply profile employer and evidence rules; unknown pay is not high-pay proof."
+    },
+    {
+      "id": "linkedin_no",
+      "country": "NO",
+      "priority": 3,
+      "method": "agent_reach_prefetch",
+      "entrypoint": "state/linkedin_candidates.json",
+      "lanes": [
+        "ai_research",
+        "ai_engineering",
+        "quant_ml",
+        "data_science"
+      ]
+    },
+    {
+      "id": "linkedin_ie",
+      "country": "IE",
+      "priority": 3,
+      "method": "agent_reach_prefetch",
+      "entrypoint": "state/linkedin_candidates.json",
+      "lanes": [
+        "ai_research",
+        "ai_engineering",
+        "quant_ml",
+        "data_science"
+      ]
+    },
+    {
+      "id": "linkedin_nl",
+      "country": "NL",
+      "priority": 3,
+      "method": "agent_reach_prefetch",
+      "entrypoint": "state/linkedin_candidates.json",
+      "lanes": [
+        "ai_research",
+        "ai_engineering",
+        "quant_ml",
+        "data_science"
+      ]
+    },
+    {
+      "id": "linkedin_ch",
+      "country": "CH",
+      "priority": 3,
+      "method": "agent_reach_prefetch",
+      "entrypoint": "state/linkedin_candidates.json",
+      "lanes": [
+        "ai_research",
+        "ai_engineering",
+        "quant_ml",
+        "data_science"
+      ]
+    },
+    {
+      "id": "linkedin_uk",
+      "country": "UK",
+      "priority": 3,
+      "method": "agent_reach_prefetch",
+      "entrypoint": "state/linkedin_candidates.json",
+      "lanes": [
+        "ai_research",
+        "ai_engineering",
+        "quant_ml",
+        "data_science"
+      ]
     }
   ],
   "employer_targets": "employer_targets.json",
@@ -424,5 +489,71 @@
     "IE",
     "NL",
     "CH"
-  ]
+  ],
+  "linkedin": {
+    "agent_reach_version": "1.6.1",
+    "budget_seconds": 900,
+    "search_budget_seconds": 450,
+    "results_per_query": 5,
+    "max_details": 30,
+    "countries": {
+      "NO": "Norway",
+      "IE": "Ireland",
+      "NL": "Netherlands",
+      "CH": "Switzerland",
+      "UK": "United Kingdom"
+    },
+    "queries": [
+      {
+        "id": "ai_research",
+        "query": "research engineer intern",
+        "query_variants": [
+          "research engineer intern",
+          "applied scientist graduate",
+          "research engineer junior",
+          "research intern"
+        ]
+      },
+      {
+        "id": "time_series",
+        "query": "time series intern",
+        "query_variants": [
+          "time series intern",
+          "forecasting graduate",
+          "time series junior",
+          "scientific machine learning intern"
+        ]
+      },
+      {
+        "id": "ai_engineering",
+        "query": "machine learning engineer intern",
+        "query_variants": [
+          "machine learning engineer intern",
+          "AI engineer graduate",
+          "machine learning engineer junior",
+          "LLM engineer junior"
+        ]
+      },
+      {
+        "id": "quant_ml",
+        "query": "quantitative researcher intern",
+        "query_variants": [
+          "quantitative researcher intern",
+          "quant developer graduate",
+          "machine learning trading junior",
+          "quantitative research graduate"
+        ]
+      },
+      {
+        "id": "data_science",
+        "query": "data scientist intern",
+        "query_variants": [
+          "data scientist intern",
+          "data science graduate",
+          "data scientist junior",
+          "decision scientist junior"
+        ]
+      }
+    ]
+  }
 }

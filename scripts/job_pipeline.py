@@ -82,8 +82,8 @@ def canonicalize_url(raw_url: str) -> str:
         if job_id:
             return f"https://finn.no/job/ad/{job_id}"
 
-    if "linkedin.com" in host:
-        match = re.search(r"/jobs/view/(?:[^/]*-)?(\d+)", path)
+    if host == "linkedin.com" or host.endswith(".linkedin.com"):
+        match = re.fullmatch(r"/jobs/view/(?:[^/]+-)?(\d+)", path)
         if match:
             return f"https://linkedin.com/jobs/view/{match.group(1)}"
 
@@ -200,6 +200,8 @@ def content_hash(job: dict) -> str:
 
 
 def hard_gate(job: dict, now: datetime) -> str | None:
+    if job.get("evidence_verified") is False:
+        return "unverified_evidence"
     text = combined_text(job)
     if job.get("open") is False or any(term in text for term in ("no longer accepting applications", "position closed", "vacancy closed")):
         return "closed"
@@ -343,10 +345,77 @@ def save_ledger(path: Path, ledger: dict) -> None:
     temp.replace(path)
 
 
+def record_urls(job: dict) -> set[str]:
+    """Exact, reviewer-verified URL identities; never infer identity from a title."""
+    aliases = job.get("alternate_urls", [])
+    values = [job.get("url"), *(aliases if isinstance(aliases, list) else [])]
+    urls = set()
+    for value in values:
+        if not isinstance(value, str):
+            continue
+        try:
+            parts = urlsplit(value)
+            if parts.scheme in {"http", "https"} and parts.hostname:
+                urls.add(canonicalize_url(value))
+        except ValueError:
+            continue
+    return urls
+
+
+def coalesce_candidates(candidates: list, ledger: dict) -> list[dict]:
+    groups: list[dict] = []
+    for raw in candidates:
+        if not isinstance(raw, dict):
+            continue
+        urls = record_urls(raw)
+        # Expand through known aliases, including links learned in previous runs.
+        changed = True
+        while changed:
+            before = len(urls)
+            for key, record in ledger["jobs"].items():
+                known = record_urls(dict(record, url=key))
+                if urls & known:
+                    urls |= known
+            changed = len(urls) != before
+        matching = [group for group in groups if urls & group["urls"]]
+        rows = [raw]
+        for group in matching:
+            urls |= group["urls"]
+            rows.extend(group["rows"])
+            groups.remove(group)
+        groups.append({"urls": urls, "rows": rows})
+    result = []
+    for group in groups:
+        # Prefer the reviewed employer/ATS record, then the most complete record.
+        rows = sorted(group["rows"], key=lambda row: (
+            bool(re.match(r"https?://(?:[^/]+\.)?linkedin\.com/", str(row.get("url", "")))),
+            -len(clean_text(row.get("description"))),
+            clean_text(row.get("url"))))
+        job = dict(rows[0])
+        job["url"] = canonicalize_url(clean_text(job.get("url")))
+        job["alternate_urls"] = sorted(group["urls"] - {job["url"]})
+        job["_previous_keys"] = [key for key, record in ledger["jobs"].items()
+                                 if record_urls(dict(record, url=key)) & group["urls"]]
+        result.append(job)
+    return result
+
+
+def previous_record(job: dict, ledger: dict) -> dict:
+    records = [ledger["jobs"][key] for key in job.get("_previous_keys", [])]
+    if not records:
+        return {}
+    previous = dict(next((r for r in records if r.get("status") in {"reported", "legacy_seen"}), records[0]))
+    for field, choose in (("first_seen", min), ("reported_at", max)):
+        stamps = [r[field] for r in records if r.get(field)]
+        if stamps:
+            previous[field] = choose(stamps)
+    return previous
+
+
 def prepare_candidates(payload: dict, ledger: dict, now: datetime) -> tuple[list[dict], list[dict]]:
     eligible: list[dict] = []
     processed: list[dict] = []
-    for raw in payload.get("candidates", []):
+    for raw in coalesce_candidates(payload.get("candidates", []), ledger):
         if not isinstance(raw, dict):
             continue
         job = dict(raw)
@@ -357,10 +426,12 @@ def prepare_candidates(payload: dict, ledger: dict, now: datetime) -> tuple[list
         job["lane"] = infer_lane(job)
         job["seniority"] = infer_seniority(job)
         fingerprint = job["url"]
-        previous = ledger["jobs"].get(fingerprint)
+        previous = previous_record(job, ledger)
         current_hash = content_hash(job)
 
         if previous and previous.get("status") in {"reported", "legacy_seen"} and previous.get("content_hash") in {None, current_hash}:
+            job.update(status=previous["status"], content_hash=current_hash)
+            processed.append(job)  # Persist newly learned aliases even when suppressed.
             continue
 
         rejection = hard_gate(job, now)
@@ -548,10 +619,13 @@ def update_ledger(ledger: dict, processed: list[dict], selected: list[dict], now
     timestamp = now.isoformat()
     for job in processed:
         fingerprint = job["url"]
-        previous = ledger["jobs"].get(fingerprint, {})
+        previous = previous_record(job, ledger)
+        for key in job.get("_previous_keys", []):
+            ledger["jobs"].pop(key, None)
         status = "reported" if fingerprint in selected_urls else job["status"]
         ledger["jobs"][fingerprint] = {
             "url": fingerprint,
+            "alternate_urls": job.get("alternate_urls", []),
             "title": clean_text(job.get("title")),
             "company": clean_text(job.get("company")),
             "country": job.get("country"),
@@ -562,7 +636,7 @@ def update_ledger(ledger: dict, processed: list[dict], selected: list[dict], now
             "content_hash": job.get("content_hash"),
             "first_seen": previous.get("first_seen") or timestamp,
             "last_seen": timestamp,
-            "reported_at": timestamp if status == "reported" else previous.get("reported_at"),
+            "reported_at": timestamp if fingerprint in selected_urls else previous.get("reported_at"),
         }
 
 

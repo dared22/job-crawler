@@ -19,7 +19,9 @@ primary markets; attempt at least one UK source as secondary coverage.
 - Greenhouse, Lever, public JSON, plain HTML and Markdown: `web_fetch`.
 - JS-heavy or protected pages such as finn.no and Google Careers: browser, then `web_search`
   fallback.
-- LinkedIn, IrishJobs and other gated boards: `web_search`; open only promising results.
+- LinkedIn: fresh `state/linkedin_candidates.json` collected with Agent-Reach; follow
+  `docs/linkedin.md`. Fall back to `web_search` on missing/stale/failed collection.
+- IrishJobs and other gated boards: `web_search`; open only promising results.
 - Bindeleddet: read `state/bindeleddet_candidates.json`. If stale or missing, fetch
   `https://apiv2.bindeleddet.no/jobs/`; never browse its SPA.
 

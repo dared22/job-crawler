@@ -32,6 +32,41 @@ deterministic pipeline.
 - `state/raw_candidates.json`: normalized input prepared during a run.
 - `state/last_digest.txt`: exact validated Telegram output.
 
+## Python environment
+
+This project uses uv and Python 3.12. All scripts currently use the standard library;
+there are no third-party dependencies. From this directory, run:
+
+```bash
+uv sync --locked
+uv run python -m unittest discover -s tests -v
+```
+
+Run the pre-fetch script with `uv run python fetch_bindeleddet.py`. It fetches live
+postings and updates `state/bindeleddet_candidates.json`. Use `uv add <package>` if
+a third-party dependency is needed; commit both `pyproject.toml` and `uv.lock`.
+
+## LinkedIn prefetch
+
+Read `docs/linkedin.md` for setup, staging and verification rules. Read fresh
+`state/linkedin_candidates.json` (schema version 1, completed partial/complete run,
+`fetched_at` within 24 hours) alongside Bindeleddet. Treat every entry as an
+unverified lead: check the live posting and full requirements before copying it to
+final input, and set `evidence_verified: true` only after review. Prefer verified
+employer/ATS URLs; attach the exact LinkedIn posting as `alternate_urls`. LinkedIn-only
+jobs are eligible after equivalent live-status and requirements checks. Never pass
+staging directly to the pipeline, infer location from query country, or treat a
+successful detail read as proof that applications remain open.
+
+Inspect partial-run errors. Missing, running, failed or stale staging must produce a
+source warning and fall back to normal web-search discovery; continue other sources.
+Use one `linkedin_<country>` source per country for actual attempts, including its
+web-search fallback; queries do not count as independent sources. Do not fabricate
+attempts for countries skipped because of budget or setup failure. Preserve at least
+one independent non-LinkedIn source per country. Do not run the 15-minute collector
+inside the scheduled agent's own 15-minute budget; its separate cron prefetch runs
+at 07:35. For manual collection, run it before starting evidence review.
+
 ## Workflow
 
 1. Read `profile.md`, `sources.md`, `source_registry.json`, `employer_targets.json` and the current ledger.
@@ -82,7 +117,7 @@ deterministic pipeline.
 
 ```bash
 cd /home/pashatheboss1/.openclaw/workspace/skills/job-crawler
-python3 scripts/job_pipeline.py state/raw_candidates.json --commit
+uv run python scripts/job_pipeline.py state/raw_candidates.json --commit
 ```
 
 The command updates the ledger only after the digest passes validation. It retains rejected and

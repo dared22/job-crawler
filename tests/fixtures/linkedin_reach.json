@@ -1,0 +1,4 @@
+{
+  "search": {"schema_version":1,"ok":true,"channel":"linkedin","action":"jobs","backend":"opencli","items":[{"title":"Research Engineer Intern","url":"https://www.linkedin.com/jobs/view/forecasting-intern-123?trackingId=test","published_at":null,"raw":{"title":"Research Engineer Intern","company":"Cognite","location":"Oslo, Norway","listed":"2026-11-16","salary":"12 applicants"}}]},
+  "detail": {"schema_version":1,"ok":true,"channel":"linkedin","action":"read","backend":"opencli","items":[{"url":"https://www.linkedin.com/jobs/search/?currentJobId=123","text":"Build probabilistic time-series models with Python and PyTorch. MSc students welcome.","raw":{"company":"Cognite","location":"Oslo, Norway","description":"Build probabilistic time-series models with Python and PyTorch. MSc students welcome.","apply_url":"https://example.com/jobs/123"}}]}
+}

@@ -1,0 +1,9 @@
+[project]
+name = "job-crawler"
+version = "0.1.0"
+description = "Early-career job discovery and digest pipeline"
+requires-python = ">=3.12"
+dependencies = []
+
+[tool.uv]
+package = false
